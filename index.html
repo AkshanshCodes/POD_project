@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrustAI Assistant — Transparent AI Answers</title>
+  <meta name="description" content="TrustAI Assistant delivers AI-powered answers with trust scores, verified sources, and full transparency so you can always know how much to trust the response." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ======== VERIFY MODAL ======== -->
+  <div id="verify-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Source Verification">
+    <div class="modal-card">
+      <button class="modal-close" id="modal-close-btn" aria-label="Close modal">✕</button>
+      <div class="modal-header">
+        <div class="modal-icon-wrap">🔍</div>
+        <div>
+          <h2 class="modal-title">Source Verification</h2>
+          <p class="modal-subtitle">Cross-referenced from multiple independent sources</p>
+        </div>
+      </div>
+      <div id="modal-body" class="modal-body"></div>
+      <div class="modal-footer">
+        <div class="trust-meter-label">Overall Confidence</div>
+        <div class="trust-bar-wrap">
+          <div id="modal-trust-bar"></div>
+        </div>
+        <span id="modal-trust-pct" class="trust-pct"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== APP SHELL ======== -->
+  <div class="app-root">
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-orb"></div>
+        <span>TrustAI</span>
+      </div>
+
+      <div class="sidebar-new-chat">
+        <button class="btn-new-chat" id="new-chat-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          New Chat
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item" id="history-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          History
+        </button>
+        <button class="nav-item" id="settings-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          Settings
+        </button>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="sidebar-topics">
+        <div class="topics-label">Suggested Topics</div>
+        <button class="topic-chip" data-query="What is AI hallucination?">
+          <span class="topic-chip-dot"></span>AI Hallucination
+        </button>
+        <button class="topic-chip" data-query="Explain machine learning">
+          <span class="topic-chip-dot"></span>Machine Learning
+        </button>
+        <button class="topic-chip" data-query="How does deep learning work?">
+          <span class="topic-chip-dot"></span>Deep Learning
+        </button>
+        <button class="topic-chip" data-query="What is blockchain?">
+          <span class="topic-chip-dot"></span>Blockchain
+        </button>
+        <button class="topic-chip" data-query="Climate change effects">
+          <span class="topic-chip-dot"></span>Climate Change
+        </button>
+        <button class="topic-chip" data-query="What is quantum computing?">
+          <span class="topic-chip-dot"></span>Quantum Computing
+        </button>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="user-tag">
+          <div class="user-avatar">A</div>
+          <div>
+            <div class="user-name">Akshansh</div>
+            <div class="user-plan">Pro · College</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── Main chat ── -->
+    <main class="chat-main" id="chat-main">
+
+      <!-- Topbar -->
+      <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+
+        <div class="topbar-center">
+          <div class="topbar-title">
+            <span class="pulse-dot"></span>
+            TrustAI Assistant
+          </div>
+        </div>
+
+        <div class="topbar-badges">
+          <span class="badge badge-blue">📊 Trust-Scored</span>
+          <span class="badge badge-purple">🔬 Source-Verified</span>
+        </div>
+
+        <div class="topbar-spacer"></div>
+      </header>
+
+      <!-- Messages -->
+      <section class="messages-area" id="messages-area" aria-live="polite" aria-label="Chat messages">
+
+        <!-- Welcome screen -->
+        <div class="welcome-screen" id="welcome-screen">
+          <div class="welcome-logo">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <h1 class="welcome-title">How can I help you?</h1>
+          <p class="welcome-sub">Every answer includes a <strong>trust score</strong>, <strong>verified sources</strong>, and a <strong>fact-check</strong> button — so you always know what to believe.</p>
+          <div class="starter-grid">
+            <button class="starter-card" data-query="What is AI hallucination?">
+              <span class="sc-icon">🤖</span>
+              <span class="sc-text">What is AI hallucination?</span>
+            </button>
+            <button class="starter-card" data-query="Explain machine learning in simple terms">
+              <span class="sc-icon">🧠</span>
+              <span class="sc-text">Explain machine learning simply</span>
+            </button>
+            <button class="starter-card" data-query="How does blockchain work?">
+              <span class="sc-icon">🔗</span>
+              <span class="sc-text">How does blockchain work?</span>
+            </button>
+            <button class="starter-card" data-query="What are the effects of climate change?">
+              <span class="sc-icon">🌍</span>
+              <span class="sc-text">Effects of climate change?</span>
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Input dock -->
+      <footer class="input-dock">
+        <div class="input-outer">
+          <div class="input-wrap">
+            <textarea
+              id="chat-input"
+              class="chat-textarea"
+              placeholder="Message TrustAI…"
+              rows="1"
+              aria-label="Chat input"
+            ></textarea>
+            <div class="input-btns">
+              <button class="btn-attach" id="attach-btn" aria-label="Attach file" title="Attach file">📎</button>
+              <button class="btn-send" id="send-btn" aria-label="Send message" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="19" x2="12" y2="5"/>
+                  <polyline points="5 12 12 5 19 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="input-hint">TrustAI can make mistakes. Always verify important information.</div>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+
+  <script src="responses.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
