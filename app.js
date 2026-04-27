@@ -55,6 +55,125 @@ function scrollToBottom(smooth = true) {
   messagesArea.scrollTo({ top: messagesArea.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
 }
 
+/* ══════════════════════════════════════════
+   TOAST NOTIFICATIONS
+   ══════════════════════════════════════════ */
+function showToast(message, type = 'default') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.classList.add('toast-visible');
+    setTimeout(() => {
+      toast.classList.remove('toast-visible');
+      toast.classList.add('toast-hiding');
+      setTimeout(() => toast.remove(), 350);
+    }, 2500);
+  });
+}
+
+/* ══════════════════════════════════════════
+   FOLLOW-UP CHIPS MAP
+   ══════════════════════════════════════════ */
+const followUpMap = {
+  'ai hallucination': [
+    'How does retrieval-augmented generation reduce hallucination?',
+    'What is the TruthfulQA benchmark?',
+    'How does RLHF improve AI honesty?'
+  ],
+  'machine learning': [
+    'What is overfitting in machine learning?',
+    'Explain gradient descent simply',
+    'What is the difference between ML and AI?'
+  ],
+  'deep learning': [
+    'How do transformers work?',
+    'What is backpropagation?',
+    'What is the difference between CNN and RNN?'
+  ],
+  'blockchain': [
+    'What is a smart contract?',
+    'How does proof of work differ from proof of stake?',
+    'What are real-world uses of blockchain?'
+  ],
+  'climate change': [
+    'What is the Paris Agreement?',
+    'How does carbon capture work?',
+    'What are renewable energy alternatives?'
+  ],
+  'quantum': [
+    'What is quantum entanglement?',
+    "How does Shor's algorithm work?",
+    'When will quantum computers be commercially viable?'
+  ],
+  '__default__': [
+    'Can you explain this in simpler terms?',
+    'What are the key facts about this topic?',
+    'What are the most reliable sources on this?'
+  ]
+};
+
+function getFollowUps(query) {
+  const lower = query.toLowerCase();
+  for (const [key, chips] of Object.entries(followUpMap)) {
+    if (key !== '__default__' && lower.includes(key)) return chips;
+  }
+  return followUpMap['__default__'];
+}
+
+function appendFollowUpChips(cardRow, query) {
+  const chips = getFollowUps(query);
+  const aiCard = cardRow.querySelector('.ai-card');
+  if (!aiCard) return;
+  const row = document.createElement('div');
+  row.className = 'follow-up-row';
+  const label = document.createElement('div');
+  label.className = 'follow-up-label';
+  label.textContent = 'Ask a follow-up';
+  const chipWrap = document.createElement('div');
+  chipWrap.className = 'follow-up-chips';
+  chips.forEach(text => {
+    const btn = document.createElement('button');
+    btn.className = 'follow-up-chip';
+    btn.textContent = text;
+    btn.addEventListener('click', () => sendMessage(text));
+    chipWrap.appendChild(btn);
+  });
+  row.appendChild(label);
+  row.appendChild(chipWrap);
+  aiCard.appendChild(row);
+}
+
+/* ══════════════════════════════════════════
+   STREAMING EFFECT
+   ══════════════════════════════════════════ */
+function streamAnswer(el, rawText, onComplete) {
+  const plain = rawText.replace(/\*\*(.*?)\*\*/g, '$1').replace(/^•/gm, '');
+  const words = plain.split(/\s+/).filter(Boolean);
+  let idx = 0;
+  el.innerHTML = '<span class="stream-cursor"></span>';
+  const tick = setInterval(() => {
+    if (idx < words.length) {
+      const cursor = el.querySelector('.stream-cursor');
+      const node = document.createTextNode(words[idx] + ' ');
+      if (cursor) cursor.before(node); else el.appendChild(node);
+      idx++;
+      messagesArea.scrollTop = messagesArea.scrollHeight;
+    } else {
+      clearInterval(tick);
+      el.style.opacity = '0';
+      setTimeout(() => {
+        el.innerHTML = formatAnswer(rawText);
+        el.style.transition = 'opacity 0.25s ease';
+        el.style.opacity = '1';
+        if (onComplete) onComplete();
+      }, 150);
+    }
+  }, 28);
+}
+
 const mobileSidebarBackdrop = document.createElement('div');
 mobileSidebarBackdrop.className = 'mobile-sidebar-backdrop';
 appRoot?.appendChild(mobileSidebarBackdrop);
@@ -169,25 +288,27 @@ function buildAICard(data) {
     const sourceLabel = s.url
       ? `<a class="source-name source-link" href="${escapeAttr(s.url)}" target="_blank" rel="noopener noreferrer">📎 ${s.name}</a>`
       : `<span class="source-name">📎 ${s.name}</span>`;
-
     return `
     <div class="source-item">
       <span class="source-dot" style="background:${s.color}; box-shadow:0 0 5px ${s.color}88;"></span>
       ${sourceLabel}
       ${getSourceTypeTag(s.type)}
-    </div>
-  `;
+    </div>`;
   }).join('');
 
-  /* Smart Labels */
-  const confLabel  = tc === 'high' ? 'High' : tc === 'medium' ? 'Medium' : 'Low';
-  const relLabel   = trustScore >= 85 ? 'High' : trustScore >= 60 ? 'Medium' : 'Low';
-  const confClass  = `label-confidence-${tc}`;
+  /* Smart Labels — now includes Hallucination Risk */
+  const confLabel   = tc === 'high' ? 'High' : tc === 'medium' ? 'Medium' : 'Low';
+  const relLabel    = trustScore >= 85 ? 'High' : trustScore >= 60 ? 'Medium' : 'Low';
+  const confClass   = `label-confidence-${tc}`;
+  const hallucLabel = trustScore >= 80 ? 'Low' : trustScore >= 50 ? 'Medium' : 'High';
+  const hallucClass = `label-halluc-${trustScore >= 80 ? 'low' : trustScore >= 50 ? 'med' : 'high'}`;
+
   const smartLabelsHTML = `
-    <div class="smart-labels">
+    <div class="smart-labels post-stream-reveal">
       <span class="smart-label ${confClass}">📊 Confidence Level: ${confLabel}</span>
       <span class="smart-label label-reliability">📎 Source Reliability: ${relLabel}</span>
       <span class="smart-label label-verify">🔍 Verification Available</span>
+      <span class="smart-label ${hallucClass}">🤖 Hallucination Risk: ${hallucLabel}</span>
     </div>
   `;
 
@@ -205,7 +326,7 @@ function buildAICard(data) {
       <div class="ai-content-wrap">
         <div class="ai-card">
 
-          <!-- Header -->
+          <!-- Header (always visible) -->
           <div class="card-header">
             <div class="card-meta">
               <span class="card-label">📊 TrustAI Response</span>
@@ -218,13 +339,13 @@ function buildAICard(data) {
             </div>
           </div>
 
-          <!-- Answer -->
+          <!-- Answer (streamed in) -->
           <div class="card-body">
-            <div class="answer-text answer-content">${formatAnswer(answer)}</div>
+            <div class="answer-text answer-content"></div>
           </div>
 
-          <!-- Confidence bar -->
-          <div class="trust-bar-section">
+          <!-- Confidence bar (revealed after stream) -->
+          <div class="trust-bar-section post-stream-reveal">
             <div class="trust-bar-label">
               <span>Confidence Level</span>
               <span class="bar-pct-label">${trustScore}%</span>
@@ -234,17 +355,17 @@ function buildAICard(data) {
             </div>
           </div>
 
-          <!-- Smart Labels -->
+          <!-- Smart Labels (revealed after stream) -->
           ${smartLabelsHTML}
 
-          <!-- Sources -->
-          <div class="card-sources">
+          <!-- Sources (revealed after stream) -->
+          <div class="card-sources post-stream-reveal">
             <div class="sources-title">📎 Sources &amp; References</div>
             <div class="source-list">${sourcesHTML}</div>
           </div>
 
-          <!-- Actions -->
-          <div class="card-footer">
+          <!-- Actions (revealed after stream) -->
+          <div class="card-footer post-stream-reveal">
             <button class="btn-verify" data-card="${id}">🔍 Verify</button>
             <button class="btn-regenerate" data-card="${id}">
               <span class="regen-icon" style="display:inline-block;">🔁</span> Regenerate
@@ -257,21 +378,39 @@ function buildAICard(data) {
     </div>
   `;
 
+  /* Misinformation banner for low-trust responses */
+  if (trustScore < 50) {
+    const banner = document.createElement('div');
+    banner.className = 'misinfo-banner';
+    banner.innerHTML = `<span>⚠️ This response contains <strong>unverified claims</strong>. Please verify carefully before sharing.</span><button class="misinfo-dismiss" aria-label="Dismiss">✕</button>`;
+    banner.querySelector('.misinfo-dismiss').addEventListener('click', () => banner.remove());
+    row.querySelector('.ai-card').insertBefore(banner, row.querySelector('.card-body'));
+  }
+
   messagesArea.appendChild(row);
 
-  /* Animate trust bar with stagger */
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      const bar = row.querySelector('.trust-bar-fill');
-      if (bar) bar.style.width = bar.dataset.target + '%';
-    }, 120);
-  });
-
+  /* Wire action buttons */
   row.querySelector('.btn-verify').addEventListener('click', () => openVerifyModal(row));
   row.querySelector('.btn-regenerate').addEventListener('click', () => regenerate(row, data));
   row.querySelector('.btn-copy').addEventListener('click', () => copyAnswer(row));
 
+  /* Stream the answer, then reveal hidden sections */
+  const answerEl = row.querySelector('.answer-content');
+  streamAnswer(answerEl, answer, () => {
+    row.querySelectorAll('.post-stream-reveal').forEach((el, i) => {
+      setTimeout(() => el.classList.add('revealed'), i * 90);
+    });
+    setTimeout(() => {
+      const bar = row.querySelector('.trust-bar-fill');
+      if (bar) bar.style.width = bar.dataset.target + '%';
+    }, 200);
+    /* Add follow-up chips using original query stored on the row */
+    appendFollowUpChips(row, row.dataset.query || answer);
+    scrollToBottom();
+  });
+
   scrollToBottom();
+  return row;
 }
 
 /* ══════════════════════════════════════════
@@ -407,6 +546,7 @@ function regenerate(row, data) {
 function copyAnswer(row) {
   const text = row.querySelector('.answer-content').innerText;
   navigator.clipboard.writeText(text).then(() => {
+    showToast('✅ Copied to clipboard!', 'success');
     const btn = row.querySelector('.btn-copy');
     const orig = btn.textContent;
     btn.textContent = '✅ Copied!';
@@ -432,10 +572,13 @@ function sendMessage(text) {
   showTyping();
 
   const delay = 1100 + Math.random() * 900;
+  const responseData = findResponse(text);
 
   setTimeout(() => {
     removeTyping();
-    buildAICard(findResponse(text));
+    const row = buildAICard(responseData);
+    /* Store original query on row for follow-up chip matching */
+    if (row) row.dataset.query = text;
   }, delay);
 }
 
