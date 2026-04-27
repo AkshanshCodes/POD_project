@@ -545,14 +545,34 @@ function regenerate(row, data) {
    ══════════════════════════════════════════ */
 function copyAnswer(row) {
   const text = row.querySelector('.answer-content').innerText;
-  navigator.clipboard.writeText(text).then(() => {
-    showToast('✅ Copied to clipboard!', 'success');
-    const btn = row.querySelector('.btn-copy');
-    const orig = btn.textContent;
-    btn.textContent = '✅ Copied!';
-    btn.style.color = 'var(--trust-high)';
-    setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1800);
-  });
+  const btn  = row.querySelector('.btn-copy');
+  const orig = btn.textContent;
+
+  /* Show feedback immediately — don't wait on clipboard promise */
+  showToast('✅ Copied to clipboard!', 'success');
+  btn.textContent = '✅ Copied!';
+  btn.style.color = 'var(--trust-high)';
+  setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1800);
+
+  /* Try modern clipboard API first, fall back to execCommand for file:// */
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).catch(() => {
+      fallbackCopy(text);
+    });
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); } catch (e) { /* silent */ }
+  document.body.removeChild(ta);
 }
 
 /* ══════════════════════════════════════════
