@@ -286,3 +286,4 @@ function findResponse(query) {
   // Return default
   return RESPONSES[RESPONSES.length - 1];
 }
+
