@@ -261,10 +261,12 @@ function showTyping() {
   el.className = 'typing-wrap';
   el.innerHTML = `
     <div class="ai-avatar"><span class="ai-avatar-letter">T</span></div>
-    <div class="typing-card">
-      <div class="typing-dot"></div>
-      <div class="typing-dot"></div>
-      <div class="typing-dot"></div>
+    <div class="neural-typing">
+      <div class="nn-node"></div>
+      <div class="nn-line"></div>
+      <div class="nn-node"></div>
+      <div class="nn-line"></div>
+      <div class="nn-node"></div>
     </div>
   `;
   messagesArea.appendChild(el);
@@ -420,16 +422,26 @@ function openVerifyModal(row) {
   const verifyData = JSON.parse(row.dataset.verifyData);
   const score      = parseInt(row.dataset.trustScore);
 
-  /* Phase 1 — show processing spinner */
+  /* Phase 1 — show processing Knowledge Graph */
   modalBody.innerHTML = `
-    <div class="modal-processing">
-      <div class="modal-processing-ring"></div>
-      <div class="modal-processing-text">
-        Comparing multiple sources
-        <span class="modal-proc-dot"></span>
-        <span class="modal-proc-dot"></span>
-        <span class="modal-proc-dot"></span>
-      </div>
+    <div class="kg-container">
+      <svg class="kg-svg" viewBox="0 0 400 180">
+        <!-- Lines -->
+        <line x1="200" y1="90" x2="100" y2="40" class="kg-link active" />
+        <line x1="200" y1="90" x2="300" y2="40" class="kg-link active" />
+        <line x1="200" y1="90" x2="100" y2="140" class="kg-link active" />
+        <line x1="200" y1="90" x2="300" y2="140" class="kg-link active" />
+        <!-- Nodes -->
+        <circle cx="100" cy="40" r="12" class="kg-node" />
+        <circle cx="300" cy="40" r="12" class="kg-node" />
+        <circle cx="100" cy="140" r="12" class="kg-node" />
+        <circle cx="300" cy="140" r="12" class="kg-node" />
+        <!-- Center Node -->
+        <circle cx="200" cy="90" r="18" class="kg-node active" />
+      </svg>
+    </div>
+    <div style="text-align:center; color:var(--text-secondary); font-size:0.85rem; margin-top:-8px; margin-bottom:12px;">
+      Cross-referencing sources...
     </div>
   `;
   modalTrustBar.style.width = '0%';
@@ -677,19 +689,115 @@ newChatBtn.addEventListener('click', () => {
 });
 
 /* ══════════════════════════════════════════
-   ATTACH BUTTON (demo)
+   PHASE 2: DOCUMENT UPLOAD & WELCOME TOUR
    ══════════════════════════════════════════ */
-document.getElementById('attach-btn').addEventListener('click', () => {
+
+const welcomeTourOverlay = document.getElementById('welcome-tour');
+const btnStartTour = document.getElementById('btn-start-tour');
+
+btnStartTour?.addEventListener('click', () => {
+  welcomeTourOverlay.classList.remove('open');
+});
+
+const docDropzone = document.getElementById('doc-dropzone');
+const btnAttach = document.getElementById('attach-btn');
+const dropzoneCloseBtn = document.getElementById('dropzone-close-btn');
+const fileInput = document.getElementById('file-input');
+const btnBrowse = document.getElementById('btn-browse');
+
+if (btnAttach && docDropzone) {
+  btnAttach.addEventListener('click', () => {
+    docDropzone.classList.add('open');
+  });
+
+  dropzoneCloseBtn.addEventListener('click', () => {
+    docDropzone.classList.remove('open');
+  });
+
+  btnBrowse.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleFileUpload(e.target.files[0]);
+      e.target.value = ''; // reset
+    }
+  });
+
+  // Drag and drop support
+  const dropzoneContent = document.querySelector('.dropzone-content');
+  dropzoneContent.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzoneContent.classList.add('dragover');
+  });
+  dropzoneContent.addEventListener('dragleave', () => {
+    dropzoneContent.classList.remove('dragover');
+  });
+  dropzoneContent.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzoneContent.classList.remove('dragover');
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileUpload(e.dataTransfer.files[0]);
+    }
+  });
+}
+
+function handleFileUpload(file) {
+  docDropzone.classList.remove('open');
   hideWelcome();
+  
+  // Show user message with file name
+  appendUserMessage(`📎 Uploaded: ${file.name}`);
+  
+  // Show inline scanning animation
+  const scannerId = `scanner-${Date.now()}`;
   const row = document.createElement('div');
-  row.className = 'message-row user';
-  row.innerHTML = `<div class="user-message-wrap"><div class="user-bubble" style="opacity:0.65;font-size:0.85rem;">📎 [File attachment — not processed in demo]</div></div>`;
+  row.className = 'message-row ai-row';
+  row.id = scannerId;
+  row.innerHTML = `
+    <div class="ai-message-wrap">
+      <div class="ai-avatar"><span class="ai-avatar-letter">T</span></div>
+      <div class="doc-scanner-wrap">
+        <div class="laser-line"></div>
+        <div class="scanner-icon">📄</div>
+        <div class="scanner-text">
+          <div class="scanner-title">Analyzing Document</div>
+          <div class="scanner-sub">Extracting text & formatting...</div>
+          <div class="scanner-progress">
+            <div class="scanner-bar" style="width: 20%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
   messagesArea.appendChild(row);
   scrollToBottom();
-});
+  
+  const bar = row.querySelector('.scanner-bar');
+  const sub = row.querySelector('.scanner-sub');
+  
+  setTimeout(() => { bar.style.width = '60%'; sub.textContent = 'Cross-referencing claims...'; }, 1000);
+  setTimeout(() => { bar.style.width = '90%'; sub.textContent = 'Finalizing analysis...'; }, 2000);
+  
+  // Replace scanner with AI response after 3 seconds
+  setTimeout(() => {
+    const el = document.getElementById(scannerId);
+    if (el) el.remove();
+    const responseData = findResponse('__document_upload__');
+    buildAICard(responseData);
+  }, 3000);
+}
 
 /* ══════════════════════════════════════════
    INIT
    ══════════════════════════════════════════ */
 chatInput.focus();
 syncSidebarForViewport();
+
+// Show welcome tour on load
+if (welcomeTourOverlay) {
+  setTimeout(() => {
+    welcomeTourOverlay.classList.add('open');
+  }, 300);
+}

@@ -237,6 +237,39 @@ const RESPONSES = [
     ]
   },
 
+  /* ---- DOCUMENT UPLOAD MOCK ---- */
+  {
+    keywords: ["__document_upload__"],
+    answer: `I have successfully analyzed the uploaded document.\n\n**Document Summary:**\nThe document outlines the key methodologies and recent advancements in deep learning models, specifically focusing on the transition from traditional recurrent networks to transformer-based architectures. It highlights the significant improvements in parallel processing capabilities and the resulting impact on natural language understanding tasks.\n\n**Key Facts Extracted:**\n• The shift towards self-attention mechanisms.\n• The exponential increase in model parameter sizes over the last 3 years.\n• Emerging challenges regarding computational efficiency and environmental impact.\n\nI have cross-referenced these claims with our verified knowledge base. The information is highly consistent with current consensus.`,
+    trustScore: 92,
+    regenAnswer: `Here is a refined analysis of the uploaded document.\n\nThe text primarily explores the evolution of neural network architectures, with a heavy emphasis on transformer models replacing RNNs/LSTMs in modern AI applications. It notes that while transformers offer superior performance due to self-attention, they demand substantially more compute resources.\n\nAll extracted claims have been verified against recent literature and show a high degree of factual reliability.`,
+    sources: [
+      { name: "Document Analysis Engine", type: "gov", color: "#c4b5fd", reliability: 100, url: "" },
+      { name: "Cross-Reference: AI Architectural Shifts", type: "research", color: "#a5b4fc", reliability: 95, url: "" },
+      { name: "Fact-Check Module", type: "article", color: "#67e8f9", reliability: 98, url: "" }
+    ],
+    verifyData: [
+      {
+        source: "📄 Uploaded Document Context",
+        excerpt: "The uploaded file 'Research_Draft_v2.pdf' states that transformers have fundamentally changed NLP by allowing parallel processing of sequential data.",
+        match: "match",
+        url: ""
+      },
+      {
+        source: "🔬 External Knowledge Base",
+        excerpt: "This aligns with the foundational 'Attention Is All You Need' paper, which introduced the transformer architecture and its parallelizable nature.",
+        match: "match",
+        url: ""
+      },
+      {
+        source: "🔍 Semantic Consistency Check",
+        excerpt: "The document's claims regarding compute requirements are statistically consistent with known trends in LLM scaling laws.",
+        match: "match",
+        url: ""
+      }
+    ]
+  },
+
   /* ---- DEFAULT fallback ---- */
   {
     keywords: ["__default__"],

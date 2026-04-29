@@ -199,6 +199,28 @@
   <!-- Toast container -->
   <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
+  <!-- ======== DOCUMENT DROPZONE OVERLAY ======== -->
+  <div id="doc-dropzone" class="doc-dropzone">
+    <div class="dropzone-content">
+      <div class="dropzone-icon">📄</div>
+      <h3>Upload Document for Analysis</h3>
+      <p>Drag and drop a PDF, Word, or text file here, or click to browse.</p>
+      <input type="file" id="file-input" style="display:none;" accept=".pdf,.doc,.docx,.txt" />
+      <button class="btn-browse" id="btn-browse">Browse Files</button>
+      <button class="modal-close" id="dropzone-close-btn" aria-label="Close">✕</button>
+    </div>
+  </div>
+
+  <!-- ======== WELCOME TOUR OVERLAY ======== -->
+  <div id="welcome-tour" class="welcome-tour-overlay">
+    <div class="tour-card">
+      <div class="tour-icon">👋</div>
+      <h2>Welcome to TrustAI</h2>
+      <p>This assistant provides <strong>transparent answers</strong>. Every response includes a trust score, verified sources, and a fact-check modal.</p>
+      <button class="btn-primary" id="btn-start-tour">Let's Go</button>
+    </div>
+  </div>
+
   <script src="responses.js"></script>
   <script src="app.js"></script>
 </body>
