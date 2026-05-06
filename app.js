@@ -15,10 +15,14 @@ const modalBody     = document.getElementById('modal-body');
 const modalTrustBar = document.getElementById('modal-trust-bar');
 const modalTrustPct = document.getElementById('modal-trust-pct');
 const appRoot       = document.querySelector('.app-root');
+const inputHint     = document.querySelector('.input-hint');
 const mobileQuery   = window.matchMedia('(max-width: 768px)');
 
 /* ── State ── */
 let messageCount = 0;
+let pendingUploadFile = null;
+const defaultInputHint = inputHint?.textContent || '';
+const defaultInputPlaceholder = chatInput.placeholder;
 
 /* ══════════════════════════════════════════
    UTILITIES
@@ -107,6 +111,31 @@ const followUpMap = {
     'What is quantum entanglement?',
     "How does Shor's algorithm work?",
     'When will quantum computers be commercially viable?'
+  ],
+  'cybersecurity': [
+    'How can I avoid phishing attacks?',
+    'What is multi-factor authentication?',
+    'How does ransomware protection work?'
+  ],
+  'data privacy': [
+    'What rights do users have over their data?',
+    'How does GDPR protect privacy?',
+    'What data should apps avoid collecting?'
+  ],
+  'generative ai': [
+    'How do generative AI models create content?',
+    'What are the risks of deepfakes?',
+    'How can generative AI be verified?'
+  ],
+  'space exploration': [
+    'What is NASA Artemis?',
+    'Why send robots to Mars?',
+    'How do satellites help Earth?'
+  ],
+  'renewable energy': [
+    'How do solar panels work?',
+    'Why does clean energy need storage?',
+    'What are the limits of wind power?'
   ],
   '__default__': [
     'Can you explain this in simpler terms?',
@@ -219,6 +248,12 @@ function updateSendBtn() {
   sendBtn.disabled = !chatInput.value.trim();
 }
 
+function clearPendingUpload() {
+  pendingUploadFile = null;
+  chatInput.placeholder = defaultInputPlaceholder;
+  if (inputHint) inputHint.textContent = defaultInputHint;
+}
+
 chatInput.addEventListener('input', () => { autoResize(); updateSendBtn(); });
 
 /* ══════════════════════════════════════════
@@ -261,16 +296,24 @@ function showTyping() {
   el.className = 'typing-wrap';
   el.innerHTML = `
     <div class="ai-avatar"><span class="ai-avatar-letter">T</span></div>
-    <div class="neural-typing">
-      <div class="nn-node"></div>
-      <div class="nn-line"></div>
-      <div class="nn-node"></div>
-      <div class="nn-line"></div>
-      <div class="nn-node"></div>
+    <div class="typing-status-wrap">
+      <div class="neural-typing" aria-hidden="true">
+        <div class="nn-node"></div>
+        <div class="nn-line"></div>
+        <div class="nn-node"></div>
+        <div class="nn-line"></div>
+        <div class="nn-node"></div>
+      </div>
+      <span class="typing-status-text">Thinking...</span>
     </div>
   `;
   messagesArea.appendChild(el);
   scrollToBottom();
+}
+
+function updateTypingStatus(text) {
+  const status = document.querySelector('#typing-row .typing-status-text');
+  if (status) status.textContent = text;
 }
 
 function removeTyping() {
@@ -489,7 +532,17 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVerifyM
 function regenerate(row, data) {
   const btn     = row.querySelector('.btn-regenerate');
   const answerEl = row.querySelector('.answer-content');
+  const trustLabel = row.querySelector('.trust-bar-label span:first-child');
+  const trustPctLabel = row.querySelector('.bar-pct-label');
+  const bar = row.querySelector('.trust-bar-fill');
   btn.disabled  = true;
+
+  if (trustLabel) trustLabel.textContent = 'Calculating confidence level';
+  if (trustPctLabel) trustPctLabel.textContent = '0%';
+  if (bar) {
+    bar.style.width = '0%';
+    bar.dataset.target = '0';
+  }
 
   /* Step 1 — fade out current answer, show loading state */
   answerEl.style.transition = 'opacity 0.18s, transform 0.18s';
@@ -528,11 +581,14 @@ function regenerate(row, data) {
         badge.className = `trust-badge ${tc}`;
         badge.innerHTML = `<div class="trust-dot"></div>${getTrustIcon(newScore)} ${newScore}% Trust`;
 
-        const bar = row.querySelector('.trust-bar-fill');
-        bar.className  = `trust-bar-fill ${tc}`;
-        bar.style.width = newScore + '%';
+        if (bar) {
+          bar.className  = `trust-bar-fill ${tc}`;
+          bar.dataset.target = newScore;
+          bar.style.width = newScore + '%';
+        }
 
-        row.querySelector('.bar-pct-label').textContent = newScore + '%';
+        if (trustLabel) trustLabel.textContent = 'Confidence Level';
+        if (trustPctLabel) trustPctLabel.textContent = newScore + '%';
         row.dataset.trustScore = newScore;
 
         /* Update smart labels */
@@ -594,6 +650,17 @@ function sendMessage(text) {
   text = text.trim();
   if (!text) return;
 
+  if (pendingUploadFile) {
+    const file = pendingUploadFile;
+    clearPendingUpload();
+    closeSidebarOnMobile();
+    chatInput.value = '';
+    autoResize();
+    updateSendBtn();
+    runDocumentAnalysis(file, text);
+    return;
+  }
+
   closeSidebarOnMobile();
   hideWelcome();
   chatInput.value = '';
@@ -603,15 +670,25 @@ function sendMessage(text) {
   appendUserMessage(text);
   showTyping();
 
-  const delay = 1100 + Math.random() * 900;
+  const thinkingDelay = 900;
+  const generatingDelay = 900 + Math.random() * 500;
+  const verifyingDelay = 800;
   const responseData = findResponse(text);
 
   setTimeout(() => {
-    removeTyping();
-    const row = buildAICard(responseData);
-    /* Store original query on row for follow-up chip matching */
-    if (row) row.dataset.query = text;
-  }, delay);
+    updateTypingStatus('Generating answers...');
+
+    setTimeout(() => {
+      updateTypingStatus('Verifying from resources...');
+
+      setTimeout(() => {
+        removeTyping();
+        const row = buildAICard(responseData);
+        /* Store original query on row for follow-up chip matching */
+        if (row) row.dataset.query = text;
+      }, verifyingDelay);
+    }, generatingDelay);
+  }, thinkingDelay);
 }
 
 /* ── Keyboard & button ── */
@@ -678,6 +755,7 @@ function buildWelcomeHTML() {
 }
 
 newChatBtn.addEventListener('click', () => {
+  clearPendingUpload();
   messagesArea.innerHTML = buildWelcomeHTML();
   welcomeVisible = true;
   wireStarters(messagesArea);
@@ -720,7 +798,7 @@ if (btnAttach && docDropzone) {
 
   fileInput.addEventListener('change', (e) => {
     if (e.target.files && e.target.files.length > 0) {
-      handleFileUpload(e.target.files[0]);
+      attachFileForPrompt(e.target.files[0]);
       e.target.value = ''; // reset
     }
   });
@@ -738,17 +816,30 @@ if (btnAttach && docDropzone) {
     e.preventDefault();
     dropzoneContent.classList.remove('dragover');
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFileUpload(e.dataTransfer.files[0]);
+      attachFileForPrompt(e.dataTransfer.files[0]);
     }
   });
 }
 
-function handleFileUpload(file) {
+function attachFileForPrompt(file) {
   docDropzone.classList.remove('open');
+  welcomeTourOverlay?.classList.remove('open');
+  pendingUploadFile = file;
+  chatInput.placeholder = `Ask about ${file.name}...`;
+  if (inputHint) inputHint.textContent = `Attached: ${file.name}. Type a prompt, then press Enter to analyze.`;
+  showToast(`📎 Attached ${file.name}. Add a prompt to send.`, 'default');
+  chatInput.focus();
+  autoResize();
+  updateSendBtn();
+}
+
+function runDocumentAnalysis(file, prompt) {
+  welcomeTourOverlay?.classList.remove('open');
   hideWelcome();
   
-  // Show user message with file name
-  appendUserMessage(`📎 Uploaded: ${file.name}`);
+  // Show user message with prompt and file name
+  appendUserMessage(`${prompt}\n📎 Attached: ${file.name}`);
+  chatInput.focus();
   
   // Show inline scanning animation
   const scannerId = `scanner-${Date.now()}`;
@@ -786,6 +877,7 @@ function handleFileUpload(file) {
     if (el) el.remove();
     const responseData = findResponse('__document_upload__');
     buildAICard(responseData);
+    chatInput.focus();
   }, 3000);
 }
 

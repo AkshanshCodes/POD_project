@@ -270,6 +270,171 @@ const RESPONSES = [
     ]
   },
 
+  /* ---- CYBERSECURITY ---- */
+  {
+    keywords: ["cybersecurity", "cyber security", "phishing", "malware", "ransomware", "data breach"],
+    answer: `Cybersecurity is the practice of protecting systems, networks, devices, and data from unauthorized access, misuse, disruption, or theft.\n\n**Common threats include:**\n• **Phishing** — fake messages designed to steal passwords or sensitive information\n• **Malware** — harmful software such as viruses, spyware, or trojans\n• **Ransomware** — malware that encrypts files and demands payment\n• **Data breaches** — unauthorized exposure of private records\n\nStrong cybersecurity depends on layered defenses: multi-factor authentication, regular updates, encrypted data, least-privilege access, backups, employee awareness, and continuous monitoring.`,
+    trustScore: 90,
+    regenAnswer: `Cybersecurity is about reducing digital risk. Instead of relying on one tool, organizations use a defense-in-depth approach: secure identities, patch vulnerable systems, monitor suspicious activity, train users, and prepare an incident response plan.\n\nFor individuals, the highest-impact steps are using unique passwords with a password manager, enabling multi-factor authentication, avoiding suspicious links, updating software, and backing up important files.`,
+    sources: [
+      { name: "CISA — Cybersecurity Best Practices", type: "gov", color: "#fca5a5", reliability: 96, url: "https://www.cisa.gov/topics/cybersecurity-best-practices" },
+      { name: "NIST Cybersecurity Framework", type: "gov", color: "#fca5a5", reliability: 98, url: "https://www.nist.gov/cyberframework" },
+      { name: "Microsoft Security — Ransomware Guide", type: "article", color: "#67e8f9", reliability: 88, url: "https://www.microsoft.com/en-us/security/business/security-101/what-is-ransomware" }
+    ],
+    verifyData: [
+      {
+        source: "🛡️ CISA — Cybersecurity Best Practices",
+        excerpt: "CISA recommends practical protections such as multi-factor authentication, software updates, data backups, and phishing awareness to reduce cyber risk.",
+        match: "match",
+        url: "https://www.cisa.gov/topics/cybersecurity-best-practices"
+      },
+      {
+        source: "📘 NIST Cybersecurity Framework",
+        excerpt: "NIST organizes cybersecurity work around identifying, protecting, detecting, responding to, and recovering from security events.",
+        match: "match",
+        url: "https://www.nist.gov/cyberframework"
+      },
+      {
+        source: "🔐 Microsoft Security",
+        excerpt: "Ransomware is malicious software that blocks access to systems or files until a ransom is demanded, making backups and prevention essential.",
+        match: "partial",
+        url: "https://www.microsoft.com/en-us/security/business/security-101/what-is-ransomware"
+      }
+    ]
+  },
+
+  /* ---- DATA PRIVACY ---- */
+  {
+    keywords: ["data privacy", "privacy", "personal data", "gdpr", "data protection", "cookies"],
+    answer: `Data privacy is the control people and organizations have over how personal information is collected, used, shared, stored, and deleted.\n\n**Key principles:**\n• **Consent** — users should understand and approve how data is used\n• **Minimization** — collect only what is necessary\n• **Transparency** — explain data practices clearly\n• **Security** — protect stored and transmitted information\n• **User rights** — allow access, correction, deletion, or portability where laws require it\n\nGood privacy design builds trust because users can see that their information is handled responsibly instead of quietly exploited.`,
+    trustScore: 89,
+    regenAnswer: `Data privacy focuses on responsible handling of personal information. A privacy-conscious system limits collection, explains why data is needed, secures it properly, and gives users meaningful control.\n\nRegulations like GDPR and CCPA influenced modern privacy practices, but privacy is not only a legal issue. It is also a product-design and trust issue: collect less, keep it safer, and make choices understandable.`,
+    sources: [
+      { name: "European Commission — GDPR", type: "gov", color: "#fca5a5", reliability: 96, url: "https://commission.europa.eu/law/law-topic/data-protection/data-protection-eu_en" },
+      { name: "FTC — Protecting Consumer Privacy", type: "gov", color: "#fca5a5", reliability: 93, url: "https://www.ftc.gov/business-guidance/privacy-security" },
+      { name: "OECD Privacy Guidelines", type: "research", color: "#a5b4fc", reliability: 90, url: "https://www.oecd.org/sti/ieconomy/oecdguidelinesontheprotectionofprivacyandtransborderflowsofpersonaldata.htm" }
+    ],
+    verifyData: [
+      {
+        source: "🇪🇺 European Commission — Data Protection",
+        excerpt: "EU data protection rules emphasize lawful processing, transparency, data subject rights, and protection of personal data.",
+        match: "match",
+        url: "https://commission.europa.eu/law/law-topic/data-protection/data-protection-eu_en"
+      },
+      {
+        source: "🏛️ FTC — Privacy and Security",
+        excerpt: "The FTC provides guidance for businesses on protecting consumer privacy and securing sensitive information.",
+        match: "match",
+        url: "https://www.ftc.gov/business-guidance/privacy-security"
+      },
+      {
+        source: "📄 OECD Privacy Guidelines",
+        excerpt: "OECD privacy principles include collection limitation, purpose specification, use limitation, security safeguards, and accountability.",
+        match: "match",
+        url: "https://www.oecd.org/sti/ieconomy/oecdguidelinesontheprotectionofprivacyandtransborderflowsofpersonaldata.htm"
+      }
+    ]
+  },
+
+  /* ---- GENERATIVE AI ---- */
+  {
+    keywords: ["generative ai", "gen ai", "text to image", "image generation", "chatbot", "large language model"],
+    answer: `Generative AI refers to AI systems that create new content such as text, images, code, audio, video, or designs based on patterns learned from training data.\n\n**Common examples:**\n• Chatbots that write or summarize text\n• Image generators that create visuals from prompts\n• Code assistants that suggest functions or debug logic\n• Audio and video models that synthesize media\n\nGenerative AI is powerful because it can accelerate creative and analytical work, but it also introduces risks: hallucinated facts, copyright uncertainty, deepfakes, bias, and overreliance without verification.`,
+    trustScore: 87,
+    regenAnswer: `Generative AI creates outputs instead of only classifying or predicting labels. Large language models generate text token by token, diffusion models generate images by reversing noise, and multimodal models combine text, vision, audio, and other signals.\n\nIts best use is as a collaborator for drafting, brainstorming, coding, and summarization, with human review and source verification for important claims.`,
+    sources: [
+      { name: "Google Cloud — Generative AI Overview", type: "article", color: "#67e8f9", reliability: 86, url: "https://cloud.google.com/discover/what-is-generative-ai" },
+      { name: "IBM — What Is Generative AI?", type: "article", color: "#67e8f9", reliability: 86, url: "https://www.ibm.com/topics/generative-ai" },
+      { name: "NIST — AI Risk Management Framework", type: "gov", color: "#fca5a5", reliability: 95, url: "https://www.nist.gov/itl/ai-risk-management-framework" }
+    ],
+    verifyData: [
+      {
+        source: "☁️ Google Cloud — Generative AI",
+        excerpt: "Generative AI can produce text, images, audio, code, and other media from learned patterns and user prompts.",
+        match: "match",
+        url: "https://cloud.google.com/discover/what-is-generative-ai"
+      },
+      {
+        source: "💼 IBM — Generative AI",
+        excerpt: "Generative AI models create original-seeming content based on training data and are used for text, images, code, and media generation.",
+        match: "match",
+        url: "https://www.ibm.com/topics/generative-ai"
+      },
+      {
+        source: "📋 NIST AI Risk Management Framework",
+        excerpt: "AI systems require risk management across validity, reliability, safety, security, accountability, transparency, and fairness.",
+        match: "partial",
+        url: "https://www.nist.gov/itl/ai-risk-management-framework"
+      }
+    ]
+  },
+
+  /* ---- SPACE EXPLORATION ---- */
+  {
+    keywords: ["space exploration", "nasa", "mars", "moon mission", "artemis", "rocket"],
+    answer: `Space exploration is the use of satellites, robotic probes, telescopes, spacecraft, and human missions to study Earth, the Moon, planets, stars, and the wider universe.\n\n**Why it matters:**\n• Scientific discovery about planetary systems and cosmic history\n• Earth observation for weather, climate, disasters, and agriculture\n• Technology development in materials, robotics, communication, and navigation\n• Long-term preparation for human activity beyond Earth\n\nModern space exploration combines government programs like NASA's Artemis missions with private launch companies, international partnerships, and robotic missions to Mars and beyond.`,
+    trustScore: 91,
+    regenAnswer: `Space exploration helps humanity understand both the universe and our own planet. Robotic missions collect data from places humans cannot easily reach, while telescopes study distant galaxies and exoplanets.\n\nHuman exploration is more expensive and risky, but it drives engineering progress and inspires long-term goals such as sustainable lunar bases and future Mars missions.`,
+    sources: [
+      { name: "NASA — Artemis Program", type: "gov", color: "#fca5a5", reliability: 98, url: "https://www.nasa.gov/humans-in-space/artemis/" },
+      { name: "NASA — Mars Exploration Program", type: "gov", color: "#fca5a5", reliability: 97, url: "https://mars.nasa.gov/" },
+      { name: "ESA — Space Science", type: "gov", color: "#fca5a5", reliability: 94, url: "https://www.esa.int/Science_Exploration/Space_Science" }
+    ],
+    verifyData: [
+      {
+        source: "🚀 NASA — Artemis",
+        excerpt: "NASA's Artemis program is focused on returning humans to the Moon and building a foundation for deeper space exploration.",
+        match: "match",
+        url: "https://www.nasa.gov/humans-in-space/artemis/"
+      },
+      {
+        source: "🔴 NASA — Mars Exploration",
+        excerpt: "Robotic Mars missions study geology, climate, habitability, and the history of water on the planet.",
+        match: "match",
+        url: "https://mars.nasa.gov/"
+      },
+      {
+        source: "🛰️ European Space Agency",
+        excerpt: "Space science missions investigate planets, stars, galaxies, and fundamental questions about the universe.",
+        match: "partial",
+        url: "https://www.esa.int/Science_Exploration/Space_Science"
+      }
+    ]
+  },
+
+  /* ---- RENEWABLE ENERGY ---- */
+  {
+    keywords: ["renewable energy", "solar energy", "wind energy", "clean energy", "hydropower", "green energy"],
+    answer: `Renewable energy comes from sources that naturally replenish on human timescales, such as sunlight, wind, flowing water, geothermal heat, and biomass.\n\n**Major types:**\n• **Solar** — converts sunlight into electricity using photovoltaic panels\n• **Wind** — uses turbines to convert moving air into power\n• **Hydropower** — uses flowing or falling water\n• **Geothermal** — uses heat from inside Earth\n\nRenewables reduce dependence on fossil fuels and can lower greenhouse gas emissions, but they also require grid upgrades, storage, transmission planning, and responsible material supply chains.`,
+    trustScore: 93,
+    regenAnswer: `Renewable energy is central to decarbonizing electricity. Solar and wind have grown quickly because costs have fallen and deployment is scalable, but their output varies with weather and time of day.\n\nA reliable clean-energy system often combines renewables with batteries, transmission lines, demand response, hydropower, geothermal, nuclear, or other firm low-carbon resources depending on local needs.`,
+    sources: [
+      { name: "IEA — Renewables", type: "research", color: "#a5b4fc", reliability: 96, url: "https://www.iea.org/energy-system/renewables" },
+      { name: "NREL — Renewable Energy Basics", type: "gov", color: "#fca5a5", reliability: 95, url: "https://www.nrel.gov/research/re-renewable-energy.html" },
+      { name: "U.S. Energy Information Administration", type: "gov", color: "#fca5a5", reliability: 94, url: "https://www.eia.gov/energyexplained/renewable-sources/" }
+    ],
+    verifyData: [
+      {
+        source: "⚡ IEA — Renewables",
+        excerpt: "Renewable electricity generation has expanded rapidly, especially from solar PV and wind power, as costs and deployment barriers change.",
+        match: "match",
+        url: "https://www.iea.org/energy-system/renewables"
+      },
+      {
+        source: "🔬 NREL — Renewable Energy",
+        excerpt: "NREL studies renewable power technologies including solar, wind, water, geothermal, and bioenergy.",
+        match: "match",
+        url: "https://www.nrel.gov/research/re-renewable-energy.html"
+      },
+      {
+        source: "📊 EIA — Renewable Sources",
+        excerpt: "Renewable energy sources include biomass, hydropower, geothermal, wind, and solar energy.",
+        match: "match",
+        url: "https://www.eia.gov/energyexplained/renewable-sources/"
+      }
+    ]
+  },
+
   /* ---- DEFAULT fallback ---- */
   {
     keywords: ["__default__"],
@@ -319,4 +484,3 @@ function findResponse(query) {
   // Return default
   return RESPONSES[RESPONSES.length - 1];
 }
-
